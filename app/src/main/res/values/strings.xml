@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DemoApp</string>
+    <string name="no_data">No Slots found for this date! Take some rest.</string>
+    <string name="error_connecting">Error Loading data…Check your Internet Connection.</string>
+</resources>
