@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private SchedulePojo[] schedulePojos;
     private TimeslotsPojo[] currentTimeslots;
     private TextView errorText;
+    private boolean loading=true;
     private AVLoadingIndicatorView avi;
     private HorizontalCalendar horizontalCalendar;
     private final SimpleDateFormat scheduleDateFormat = new SimpleDateFormat("yyyy-MM-dd", /*Locale.getDefault()*/Locale.ENGLISH);
@@ -110,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (loading)
+                    return;
                 float rotation = isExpanded ? 0 : 180;
                 ViewCompat.animate(arrow).rotation(rotation).start();
                 isExpanded = !isExpanded;
@@ -259,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
             }
             MainActivity.this.schedulePojos = schedulePojos;
             updateData();
+            loading=false;
         }
 
         boolean isOnline() {
@@ -279,12 +284,14 @@ public class MainActivity extends AppCompatActivity {
     private void updateData() {
         avi.show();
         currentTimeslots=null;
-        for (SchedulePojo schedulePojo : schedulePojos) {
-            String date = scheduleDateFormat.format(selectedDate);
-            if (date.compareTo(schedulePojo.getFullDate()) == 0) {
-                Log.d(TAG, "updateData: Matched, length is "+schedulePojo.getTimeslots().length+" Date is "+date);
-                currentTimeslots = schedulePojo.getTimeslots();
-                break;
+        if (schedulePojos!=null) {
+            for (SchedulePojo schedulePojo : schedulePojos) {
+                String date = scheduleDateFormat.format(selectedDate);
+                if (date.compareTo(schedulePojo.getFullDate()) == 0) {
+                    Log.d(TAG, "updateData: Matched, length is " + schedulePojo.getTimeslots().length + " Date is " + date);
+                    currentTimeslots = schedulePojo.getTimeslots();
+                    break;
+                }
             }
         }
         if (currentTimeslots!=null && currentTimeslots.length!=0) {
@@ -295,5 +302,12 @@ public class MainActivity extends AppCompatActivity {
             errorText.setVisibility(View.VISIBLE);
         }
         avi.hide();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (loading)
+            return false;
+        return super.onTouchEvent(event);
     }
 }
